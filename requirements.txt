@@ -1,0 +1,10 @@
+fastapi
+pydantic
+psycopg2
+# passlib[bcrypt]
+python-dotenv
+uvicorn
+pydantic[email]
+bcrypt==4.0.1
+passlib
+python-multipart

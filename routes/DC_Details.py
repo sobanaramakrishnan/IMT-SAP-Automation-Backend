@@ -4,6 +4,7 @@ from database import get_db_connection
 import os
 import uuid
 from dotenv import load_dotenv
+from datetime import datetime
 load_dotenv()
 
 router = APIRouter(tags=["DC Details"])
@@ -109,4 +110,56 @@ def get_dc_details():
         if conn:
             conn.close()
 
+
+
+ 
+@router.post("/verify-dc-details")
+def verify_dc(
+    dc_id: int = Form(...),
+    user_id: int = Form(...),
+    status: str = Form(...), 
+    reviewed_weight: float = Form(...),
+    reviewed_quantity: int = Form(...),
+    process_type: str = Form(...),
+    notification_status : str = Form(...) 
+):
+    if status not in ["Approved", "Rejected"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Status must be 'Approved' or 'Rejected'"
+        )
+
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM automation.dc_details WHERE dc_id = %s", (dc_id,))
+        dc = cursor.fetchone()
+        if not dc:
+            raise HTTPException(status_code=404, detail="DC not found")
+
+        cursor.execute(
+            """
+            UPDATE automation.dc_details
+            SET verified_by = %s,
+                verified_at = %s,
+                verified_status = %s,
+                reviewed_weight = %s,
+                reviewed_quantity = %s,
+                process_type = %s,
+                notification_sent = %s
+            WHERE dc_id = %s
+            """,
+            (user_id, datetime.now(),status, reviewed_weight, reviewed_quantity, process_type, notification_status,dc_id)
+        )
+        conn.commit()
+
+        return {"message": f"DC {status.lower()} successfully verified with process '{process_type}'"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 

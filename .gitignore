@@ -1,4 +1,4 @@
-venv
+myvenv
 .env
 Files
 __pycache__

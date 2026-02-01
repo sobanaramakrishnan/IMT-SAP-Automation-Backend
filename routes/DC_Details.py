@@ -110,12 +110,8 @@ def get_dc_details():
         if conn:
             conn.close()
 
-
-
- 
 @router.post("/verify-dc-details")
 def verify_dc(
-    dc_id: int = Form(...),
     user_id: int = Form(...),
     status: str = Form(...), 
     reviewed_weight: float = Form(...),
@@ -133,7 +129,7 @@ def verify_dc(
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM automation.dc_details WHERE dc_id = %s", (dc_id,))
+        cursor.execute("SELECT * FROM automation.dc_details WHERE user_id = %s", (user_id,))
         dc = cursor.fetchone()
         if not dc:
             raise HTTPException(status_code=404, detail="DC not found")
@@ -150,7 +146,7 @@ def verify_dc(
                 notification_sent = %s
             WHERE dc_id = %s
             """,
-            (user_id, datetime.now(),status, reviewed_weight, reviewed_quantity, process_type, notification_status,dc_id)
+            (user_id, datetime.now(),status, reviewed_weight, reviewed_quantity, process_type, notification_status,user_id)
         )
         conn.commit()
 

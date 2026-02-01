@@ -68,3 +68,45 @@ def submit_dc_details(
         if conn:
             cursor.close()
             conn.close()
+
+@router.get("/view-dc-details")
+def get_dc_details():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT 
+                dc_number,
+                part_name,
+                part_number,
+                quantity,
+                weight
+            FROM automation.dc_details
+            """,
+        
+        )
+
+        rows = cursor.fetchall()
+
+        if not rows:
+            return {
+                "message": "No DC details found",
+                "data": rows
+            }
+
+        return {
+            "message": "DC details fetched successfully",
+            "data": rows
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        if conn:
+            conn.close()
+
+

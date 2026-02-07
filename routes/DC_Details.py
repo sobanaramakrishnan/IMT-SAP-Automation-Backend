@@ -162,3 +162,49 @@ def verify_dc(
             cursor.close()
             conn.close()
 
+@router.get("/get-pending-count")
+def get_pending_dc_count():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()  
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS pending_count
+            FROM automation.dc_details
+            WHERE TRIM(LOWER(verified_status)) = 'pending'
+            """
+        )
+        result = cursor.fetchone()
+        return {"pending_count": result["pending_count"]}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database error")
+
+    finally:
+        if conn:
+            conn.close()
+
+@router.get("/get-verified-count")
+def get_verified_dc_count():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()  
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS verified_count
+            FROM automation.dc_details
+            WHERE TRIM(LOWER(verified_status)) = 'verified'
+            """
+        )
+        result = cursor.fetchone()
+        return {"verified_count": result["verified_count"]}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Database error")
+
+    finally:
+        if conn:
+            conn.close()
+

@@ -8,3 +8,5 @@ pydantic[email]
 bcrypt==4.0.1
 passlib
 python-multipart
+openpyxl
+pandas
